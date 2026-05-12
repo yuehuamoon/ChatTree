@@ -6,7 +6,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {
-        "chat.chatcommon"      // 公共模块包（JwtUtil所在）
+        "chat.chatcommon",
+        "chat.chatuser"
 })
 public class ChatUserApplication {
 

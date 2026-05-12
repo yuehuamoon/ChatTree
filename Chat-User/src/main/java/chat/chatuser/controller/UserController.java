@@ -24,12 +24,6 @@ public class UserController {
     @Autowired
     private UserService userService;  // 假设 UserService 已适配 UserDTO
 
-
-
-
-
-
-
     @PostMapping("/login")
     public Result login(@RequestBody UserDTO user) {
         UserDTO userDTO = userService.login(user);

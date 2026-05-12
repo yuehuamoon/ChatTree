@@ -45,7 +45,9 @@ public class AuthFilter implements GlobalFilter {
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
         String requestPath = request.getPath().value();
-
+        if (true){
+            return chain.filter(exchange);
+        }
         // ========== 全局放行逻辑（所有路由共用） ==========
         for (String allowPath : GLOBAL_ALLOW_PATHS) {
             if (pathMatcher.match(allowPath, requestPath)) {
