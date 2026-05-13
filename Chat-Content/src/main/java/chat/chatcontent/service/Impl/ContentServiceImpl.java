@@ -1,6 +1,8 @@
 package chat.chatcontent.service.Impl;
 
+import chat.chatcommon.dto.Result;
 import chat.chatcommon.util.ImageUtil;
+import chat.chatcontent.feign.RecommendClient;
 import chat.chatcontent.mapper.ContentMapper;
 import chat.chatcontent.pojo.dto.ContentDTO;
 import chat.chatcontent.service.ContentService;
@@ -21,6 +23,9 @@ public class ContentServiceImpl implements ContentService {
 
     @Autowired
     private ContentMapper contentMapper;
+
+    @Autowired
+    private RecommendClient recommendClient;
 
     @Autowired
     private OssUploadService ossUploadService;  // 直接注入 OSS 服务
@@ -83,8 +88,15 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<ContentDTO> selectByStatus(int status, int offset, int limit) {
-        return contentMapper.selectByStatus(status, offset, limit);
+    public List<ContentDTO> selectByStatus(Integer userID) {
+        Result<List<Integer>> contentList = recommendClient.getContentById();
+        System.out.println(contentList);
+        List<Integer> statusList = new ArrayList<>();
+        statusList.add(userID);
+        statusList.add(3);
+        List<ContentDTO> contentDTOList = contentMapper.selectByIdList(statusList);
+        System.out.println(contentDTOList);
+        return contentDTOList;
     }
 
     @Override

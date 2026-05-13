@@ -19,8 +19,8 @@ public interface ContentService {
     /** 逻辑删除 */
     int deleteById(Long id);
 
-    /** 分页查询指定状态的内容 */
-    List<ContentDTO> selectByStatus(int status, int offset, int limit);
+    /** 查看遇见内容 */
+    List<ContentDTO> selectByStatus(Integer userID);
 
     /** 统计总数 */
     int countAll();

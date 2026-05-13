@@ -77,6 +77,16 @@ public interface ContentMapper {
     @Select("SELECT COUNT(*) FROM content_article WHERE status = #{status} AND is_deleted = 0")
     int countByStatus(@Param("status") int status);
 
+
+    @Select("<script>" +
+            "SELECT * FROM content_article WHERE is_deleted = 0 " +
+            "AND id IN " +
+            "<foreach collection='idList' item='id' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            "</script>")
+    List<ContentDTO> selectByIdList(@Param("idList") List<Integer> idList);
+
     /**
      * 按标签分组统计
      */

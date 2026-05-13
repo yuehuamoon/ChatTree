@@ -3,6 +3,7 @@ package chat.chatcontent.controller;
 
 import chat.chatcommon.dto.Page;
 import chat.chatcommon.dto.Result;
+import chat.chatcontent.feign.RecommendClient;
 import chat.chatcontent.pojo.dto.ContentDTO;
 import chat.chatcontent.service.ContentService;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ public class ContentController {
     @Autowired
     private ContentService contentService;
 
+    @Autowired
+    private RecommendClient recommendClient;
     /**
      * 1. 查询自己发布的所有内容
      */
@@ -90,8 +93,7 @@ public class ContentController {
      */
     @PostMapping("/meetList")
     public Result<List<ContentDTO>> getMeetContent(@RequestBody Page page) {
-        int offset = (page.getPage() - 1) * page.getSize();
-        return Result.success(contentService.selectByStatus(2, offset, page.getSize()));
+        return Result.success(contentService.selectByStatus(page.getPage()));
     }
 
     /**

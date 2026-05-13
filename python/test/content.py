@@ -3,7 +3,7 @@ import base64
 import json
 
 # ===================== 配置 =====================
-BASE_URL = "http://localhost:80841"  # Chat-Content 服务端口
+BASE_URL = "http://localhost:8081"  # Chat-Content 服务端口
 HEADERS = {"Content-Type": "application/json"}
 
 
@@ -58,7 +58,7 @@ def test_publish(email, title, content, image_paths=None, tags=""):
 
     data["imageBase64List"] = image_base64_list
     data["imageNameList"] = image_name_list
-
+    data['images'] = str(image_name_list)
     resp = requests.post(url, json=data, headers=HEADERS)
     print_result(f"发布内容 - {title}", resp)
     return resp
@@ -261,41 +261,15 @@ def test_exception_cases():
     print("\n--- 查询不存在的内容 ---")
     test_get_by_id(99999)
 
+def test_meet_list():
+    page = {
+        'page': 1,
+    }
+    res = requests.post('http://127.0.0.1:8081/content/meetList', json=page)
 
+    print(res.json())
 if __name__ == "__main__":
     print("=" * 50)
     print("Chat-Content 接口测试")
     print("=" * 50)
-
-    # 检查服务
-    if not test_hello():
-        print("\n❌ 服务连接失败，请检查:")
-        print("   1. Chat-Content 是否已启动")
-        print("   2. 端口是否正确（当前: 8082）")
-        exit(1)
-
-    print("\n请选择测试模式:")
-    print("1. 完整流程测试（注册→查询→删除）")
-    print("2. 简单测试（无图片）")
-    print("3. 交互式发布")
-    print("4. 异常测试")
-    print("5. 仅查看遇见内容")
-
-    choice = input("\n请输入选项 (1-5): ").strip()
-
-    if choice == "1":
-        run_full_flow()
-    elif choice == "2":
-        run_simple_test()
-    elif choice == "3":
-        interactive_test()
-    elif choice == "4":
-        test_exception_cases()
-        test_meet_list(1, 10)
-        test_count()
-    elif choice == "5":
-        test_meet_list(1, 10)
-        test_count()
-    else:
-        print("无效选项，运行简单测试...")
-        run_simple_test()
+    test_meet_list()
