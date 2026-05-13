@@ -31,7 +31,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public int registerUser(UserDTO user){
         List<User> users = userMapper.selectAll();
-
+        for (User user1 : users){
+            if (user1.getEmail().equals(user.getEmail())){
+                return 0;
+            }
+        }
         return userMapper.registerUser(user);
     }
 

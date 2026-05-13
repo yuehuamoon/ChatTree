@@ -1,13 +1,20 @@
 package chat.chatuser.controller;
 
 import chat.chatcommon.dto.Page;
+import chat.chatoss.client.OssFeignClient;
+import chat.chatoss.service.OssUploadService;
+import chat.chatoss.util.OSSUtil;
 import chat.chatuser.pojo.dto.UserDTO;
 import chat.chatcommon.util.JwtUtil;
 import chat.chatuser.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.bind.annotation.*;
 import chat.chatcommon.dto.Result;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +27,9 @@ public class UserController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private OssUploadService ossUploadService;
 
     @Autowired
     private UserService userService;  // 假设 UserService 已适配 UserDTO
@@ -39,20 +49,29 @@ public class UserController {
         return Result.error("用户名或密码错误");
     }
 
+
+
     @PostMapping("/register")
     public Result register(@RequestBody UserDTO userDTO) {
         try {
+            // 处理 Base64 头像
+            if (userDTO.getAvatarBase64() != null && !userDTO.getAvatarBase64().isEmpty()) {
+                // 解码并上传 OSS
+                byte[] avatarImage = OSSUtil.uploadBase64ToOss(userDTO.getAvatarBase64(), userDTO.getAvatar());
+                // byte[] 转 MultipartFile
+                String avatarUrl = ossUploadService.upload(userDTO.getAvatar(),avatarImage);
+                userDTO.setAvatar(avatarUrl);
+            }
 
             int result = userService.registerUser(userDTO);
             if (result == 1) {
                 return Result.success("注册成功");
             } else {
-                return Result.error(400, "注册失败：数据库插入无影响行数");
+                return Result.error(400, "注册失败");
             }
         } catch (Exception e) {
             log.error("用户注册接口异常", e);
-            String errorMsg = e.getMessage() == null ? e.getClass().getName() : e.getMessage();
-            return Result.error(500, "注册失败：" + errorMsg);
+            return Result.error(500, "注册失败：" + e.getMessage());
         }
     }
 

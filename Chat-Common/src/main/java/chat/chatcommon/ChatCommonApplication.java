@@ -2,6 +2,7 @@ package chat.chatcommon;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Chat-Common 作为公共依赖模块并不需要独立运行，

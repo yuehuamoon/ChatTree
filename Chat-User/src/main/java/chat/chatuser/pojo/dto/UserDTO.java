@@ -39,6 +39,7 @@ public class UserDTO implements Serializable {
      * 头像URL(MinIO)
      */
     private String avatar;
+    private String avatarBase64;
     /**
      * 个人简介
      */

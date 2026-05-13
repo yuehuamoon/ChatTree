@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>注册</title>
+</head>
+<body>
+<form id="registerForm" enctype="multipart/form-data">
+    <input type="email" name="email" placeholder="邮箱" required>
+    <input type="text" name="username" placeholder="用户名" required>
+    <input type="password" name="password" placeholder="密码" required>
+    <input type="text" name="nickname" placeholder="昵称">
+    <input type="file" name="avatar" accept="image/*" capture>
+    <button type="submit">注册</button>
+</form>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // 创建 FormData 对象
+        const formData = new FormData();
+        formData.append('email', document.querySelector('[name="email"]').value);
+        formData.append('username', document.querySelector('[name="username"]').value);
+        formData.append('password', document.querySelector('[name="password"]').value);
+        formData.append('nickname', document.querySelector('[name="nickname"]').value);
+
+        const file = document.querySelector('[name="avatar"]').files[0];
+        if (file) {
+            formData.append('avatar', file);  // 直接传文件
+        }
+
+        try {
+            const response = await fetch('http://localhost:8081/user/register', {
+                method: 'POST',
+                body: formData  // 不要设置 Content-Type，浏览器会自动设置
+            });
+
+            const result = await response.json();
+            alert(JSON.stringify(result, null, 2));
+        } catch (error) {
+            console.error('注册失败:', error);
+        }
+    });
+</script>
+</body>
+</html>

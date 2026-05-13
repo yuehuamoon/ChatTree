@@ -44,7 +44,7 @@ public class OssController {
 
             // 3. 拼接可直接访问的图片 URL
             String imgUrl = minioConfig.getEndpoint() + "/" + minioConfig.getBucketName() + "/" + fileName;
-            return "上传成功：" + imgUrl;
+            return imgUrl;
 
         } catch (Exception e) {
             e.printStackTrace();
