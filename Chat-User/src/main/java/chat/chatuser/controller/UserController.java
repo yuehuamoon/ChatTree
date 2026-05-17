@@ -37,6 +37,7 @@ public class UserController {
     @PostMapping("/login")
     public Result login(@RequestBody UserDTO user) {
         UserDTO userDTO = userService.login(user);
+        System.out.println(user);
         if (userDTO != null) {
             Map<String, Object> claims = new HashMap<>();
             claims.put("email", userDTO.getEmail());

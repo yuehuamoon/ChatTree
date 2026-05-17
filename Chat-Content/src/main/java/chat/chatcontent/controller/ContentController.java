@@ -5,6 +5,7 @@ import chat.chatcommon.dto.Page;
 import chat.chatcommon.dto.Result;
 import chat.chatcontent.feign.RecommendClient;
 import chat.chatcontent.pojo.dto.ContentDTO;
+import chat.chatcontent.pojo.dto.RecommentDTO;
 import chat.chatcontent.service.ContentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,7 @@ public class ContentController {
     }
 
     /**
-     * 4. 根据匹配模块返回的id，返回相关内容
+     * 4. 根据ID返回内容（作者本人可看任何状态，其他人只能看到审核通过的）
      */
     @PostMapping("/getById")
     public Result<ContentDTO> getContentById(@RequestBody ContentDTO contentDTO) {
@@ -81,7 +82,11 @@ public class ContentController {
         if (content == null) {
             return Result.error("内容不存在");
         }
-        // 只返回审核通过的内容
+        // 作者本人可以看自己的内容（任何状态）
+        if (contentDTO.getEmail() != null && contentDTO.getEmail().equals(content.getEmail())) {
+            return Result.success(content);
+        }
+        // 其他人只能看审核通过的内容
         if (content.getStatus() != 2) {
             return Result.error("内容不可见");
         }
@@ -92,8 +97,23 @@ public class ContentController {
      * 5. 查看遇见的内容（分页查询审核通过的内容）
      */
     @PostMapping("/meetList")
-    public Result<List<ContentDTO>> getMeetContent(@RequestBody Page page) {
-        return Result.success(contentService.selectByStatus(page.getPage()));
+    public Result<List<ContentDTO>> getMeetContent(@RequestBody ContentDTO contentDTO) {
+        return Result.success(contentService.selectByRecommend(contentDTO));
+    }
+
+    @PostMapping("/recommend")
+    public Result pushRecommend(@RequestBody ContentDTO contentDTO, @RequestHeader("token") String token) {
+        List<ContentDTO> contentDTOS = contentService.getRecommend(contentDTO);
+        return Result.success(contentDTOS);
+    }
+
+    @PostMapping("/deleteRecommend")
+    public Result deleteRecommend(@RequestBody RecommentDTO recommendDTO) {
+        ContentDTO contentDTO = new ContentDTO();
+        contentDTO.setId(recommendDTO.getId());
+        contentDTO.setEmail(recommendDTO.getEmail());
+        Integer message = contentService.deleteRecommend(contentDTO, recommendDTO.getTargetId());
+        return  Result.success(message);
     }
 
     /**

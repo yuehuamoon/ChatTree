@@ -1,12 +1,12 @@
 package chat.chatcontent.service.Impl;
 
 import chat.chatcommon.dto.Result;
-import chat.chatcommon.util.ImageUtil;
 import chat.chatcontent.feign.RecommendClient;
 import chat.chatcontent.mapper.ContentMapper;
 import chat.chatcontent.pojo.dto.ContentDTO;
 import chat.chatcontent.service.ContentService;
 
+import chat.chatcontent.service.RecommentService;
 import chat.chatoss.service.OssUploadService;
 import chat.chatoss.util.OSSUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ContentServiceImpl implements ContentService {
@@ -29,6 +30,9 @@ public class ContentServiceImpl implements ContentService {
 
     @Autowired
     private OssUploadService ossUploadService;  // 直接注入 OSS 服务
+
+    @Autowired
+    private RecommentService  recommentService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -67,6 +71,16 @@ public class ContentServiceImpl implements ContentService {
         contentDTO.setCreateTime(new Date());
         contentDTO.setUpdateTime(new Date());
 
+        // 将多图 URL 列表序列化为 JSON 数组存入 images 字段
+        if (!imageUrls.isEmpty()) {
+            try {
+                String imagesJson = objectMapper.writeValueAsString(imageUrls);
+                contentDTO.setImages(imagesJson);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to serialize image URLs", e);
+            }
+        }
+
         // 4. 插入数据库
         contentMapper.insertContent(contentDTO);
         return contentDTO.getId();
@@ -88,15 +102,24 @@ public class ContentServiceImpl implements ContentService {
     }
 
     @Override
-    public List<ContentDTO> selectByStatus(Integer userID) {
-        Result<List<Integer>> contentList = recommendClient.getContentById();
-        System.out.println(contentList);
-        List<Integer> statusList = new ArrayList<>();
-        statusList.add(userID);
-        statusList.add(3);
-        List<ContentDTO> contentDTOList = contentMapper.selectByIdList(statusList);
-        System.out.println(contentDTOList);
+    public List<ContentDTO> selectByRecommend(ContentDTO contentDTO) {
+        Result<List<Integer>> contentList = recommendClient.getContentById(contentDTO);
+        List<ContentDTO> contentDTOList = contentMapper.selectByIdList(contentList.getData());
         return contentDTOList;
+    }
+
+    @Override
+    public List<ContentDTO> getRecommend(ContentDTO contentDTO){
+        List<String> contentIDListStr = recommentService.getData(contentDTO);
+        List<Integer> contentIDListInt = contentIDListStr.stream().map(Integer::valueOf).collect(Collectors.toList());
+        List<ContentDTO> contentDTOList = contentMapper.selectByIdList(contentIDListInt);
+        return contentDTOList;
+    }
+
+    @Override
+    public int deleteRecommend(ContentDTO contentDTO, Long index){
+        Integer message = recommentService.deleteData(contentDTO, index);
+        return message;
     }
 
     @Override

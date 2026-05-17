@@ -20,7 +20,11 @@ public interface ContentService {
     int deleteById(Long id);
 
     /** 查看遇见内容 */
-    List<ContentDTO> selectByStatus(Integer userID);
+    List<ContentDTO> selectByRecommend(ContentDTO contentDTO);
+
+    List<ContentDTO> getRecommend(ContentDTO contentDTO);
+
+    int deleteRecommend(ContentDTO contentDTO, Long index);
 
     /** 统计总数 */
     int countAll();

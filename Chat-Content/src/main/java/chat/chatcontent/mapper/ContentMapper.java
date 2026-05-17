@@ -20,6 +20,8 @@ public interface ContentMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insertContent(ContentDTO contentDTO);
 
+    @Select("select * from content_article")
+    List<ContentDTO> selectAllContent();
     /**
      * 根据ID查询
      */
@@ -80,10 +82,15 @@ public interface ContentMapper {
 
     @Select("<script>" +
             "SELECT * FROM content_article WHERE is_deleted = 0 " +
+            "<if test='idList != null and idList.size() > 0'>" +
             "AND id IN " +
             "<foreach collection='idList' item='id' open='(' separator=',' close=')'>" +
             "#{id}" +
             "</foreach>" +
+            "</if>" +
+            "<if test='idList == null or idList.size() == 0'>" +
+            "AND 1 = 0" +  // 没有ID时返回空
+            "</if>" +
             "</script>")
     List<ContentDTO> selectByIdList(@Param("idList") List<Integer> idList);
 
