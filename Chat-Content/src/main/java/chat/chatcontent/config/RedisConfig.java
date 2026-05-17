@@ -1,0 +1,27 @@
+package chat.chatcontent.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory);
+
+        // 使用 String 序列化 Key
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+
+        // 使用 JSON 序列化 Value
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer();
+        template.setValueSerializer(jsonSerializer);
+        template.setHashValueSerializer(jsonSerializer);
+
+        template.afterPropertiesSet();
+        return template;
+    }
+}

@@ -1,4 +1,5 @@
 # main.py
+import json
 import random
 
 from fastapi import FastAPI
@@ -8,6 +9,9 @@ import time
 import uvicorn
 import socket
 import pymysql
+from DTO import *
+import redis
+
 
 app = FastAPI()
 
@@ -200,14 +204,18 @@ class MySQLClient:
 
 
 
-@app.get("/recomment")
-async def recommend():
+@app.post("/recomment")
+async def recommend(request: ContentDTO):
 
     result = set({})
-    count = client.get_count('content_article')
+    count = mysqlclient.get_count('content_article')
 
-    for i in range(3):
-        result.add(random.randint(1, count))
+    for i in range(5):
+
+        num = random.randint(1, count)
+        result.add(num)
+    for i in result:
+        redisclient.rpush(f'ChatTree:{request.email}:{request.id}', i)
 
     return {
         "code": 200,
@@ -233,12 +241,20 @@ async def batch_recommend(user_ids: list):
 
 
 if __name__ == "__main__":
-    client = MySQLClient(
+    mysqlclient = MySQLClient(
         host='localhost',
         port=3306,
         user='root',
         password='123456',
         database='chat_platform'
     )
+    # 方式1：基本连接
+    redisclient = redis.Redis(
+        host='localhost',
+        port=6379,
+        db=0,
+        decode_responses=True  # 自动解码为字符串
+    )
+
     print(f"启动 FastAPI 服务: http://{SERVICE_IP}:{SERVICE_PORT}")
     uvicorn.run(app, host="0.0.0.0", port=SERVICE_PORT)
