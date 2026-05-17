@@ -7,7 +7,7 @@
       <h2>登录 / 注册</h2>
 
     <!-- 公共字段 -->
-    <input v-model="form.phone" placeholder="账号/手机号" v-if="!isReg" />
+    <input v-model="form.email" placeholder="账号/手机号" v-if="!isReg" />
     <input v-model="form.password" type="password" placeholder="密码" />
 
     <!-- 注册额外字段 -->
@@ -25,10 +25,6 @@
       <input v-model="form.certNo" placeholder="身份证号（选填）" />
     </template>
 
-    <div class="code-row" v-if="isReg">
-      <input class="code-input" v-model="emailCode" placeholder="验证码">
-      <a class="code-btn" :class="{ disabled: countdown > 0 }" @click="generateEmailCode">{{ countdown > 0 ? `${countdown}s` : '发送验证码' }}</a>
-    </div>
     <!-- 按钮 -->
     <button @click="handleLogin" v-if="!isReg">登录</button>
     <button @click="handleReg" v-if="isReg">注册</button>
@@ -47,7 +43,7 @@ import { reactive, ref, computed } from 'vue';
 import axios from 'axios';
 import md5 from 'md5';
 import { useRouter } from 'vue-router';
-
+import { userApi } from '@/api'  // 只需要这一行导入
 const router = useRouter();
 
 const apiUrl = import.meta.env.VITE_API_URL; // http://localhost:8080
@@ -95,7 +91,6 @@ const form = reactive({
   gender: 0,     // 性别默认值
   avatarUrl: '',     // 头像URL（默认空）
   certNo: '',        // 身份证号
-  role: "1",
   code: '',
 });
 function parseJwt(token) {
@@ -108,35 +103,10 @@ function parseJwt(token) {
   }
 }
 
-async function generateEmailCode(){
-  if (countdown.value > 0) return
-  const token = localStorage.getItem("token");
-  const userInfo = parseJwt(token);
-  if (form.email == ''){
-    alert("邮箱不能为空")
-    return ;
-  }
-  const res = await axios.post("/user/generateEmailCode",
-    {'email': form.email}
-  )
-  console.log("emailcode test:", res, userInfo)
-
-  countdown.value = 60
-  countdownTimer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(countdownTimer)
-    }
-  }, 1000)
-}
-
 async function checkEmailCode() {
   const token = localStorage.getItem("token");
   const userInfo = parseJwt(token);
 
-  const res = await axios.post('/user/checkEmailCode',
-    {'email': userInfo.email, 'code': emailCode.value}
-  )
   console.log(res)
 }
 /* 登录 */
@@ -144,22 +114,22 @@ async function handleLogin() {
   try {
     // 复制表单，避免修改原数据
     const submitForm = { ...form };
-    
-    // 密码加密
-    submitForm.password = md5(submitForm.password);
+
     console.log("加密后的密码：", submitForm.password);
 
     // 登录只需要手机号和密码
     const loginData = {
-      phone: submitForm.phone,
+      email: submitForm.email,
       password: submitForm.password
     };
 
-    const res = await axios.post('/user/login', loginData);
+    const res = await userApi.login(loginData);
     result.value = res.data;
 
-    if (res.data.code === 200) {
-      localStorage.setItem('token', res.data.data);
+    console.log(res);
+
+    if (res.code === 200) {
+      localStorage.setItem('token', res.data);
       router.push('/');
     }
   } catch (e) {
