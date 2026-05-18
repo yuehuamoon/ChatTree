@@ -60,6 +60,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>Chat</groupId>
+            <artifactId>Chat-Common</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

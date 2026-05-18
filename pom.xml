@@ -141,18 +141,5 @@
             <version>2.0.61</version>
         </dependency>
     </dependencies>
-    <profiles>
-        <profile>
-            <id>inherit-common</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>Chat</groupId>
-                    <artifactId>Chat-Common</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
+
 </project>
