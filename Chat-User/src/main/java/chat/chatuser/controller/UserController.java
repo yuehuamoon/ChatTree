@@ -10,7 +10,6 @@ import chat.chatuser.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.bind.annotation.*;
 import chat.chatcommon.dto.Result;
 import org.springframework.web.multipart.MultipartFile;
